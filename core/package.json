@@ -1,0 +1,56 @@
+{
+  "name": "@appconfiger/core",
+  "version": "0.0.1",
+  "description": "Javascript library for accessing AWS AppConfig configuration and feature flags",
+  "main": "dist/index.js",
+  "types": "dist/core/src/index.d.ts",
+  "files": [
+    "dist/index.js"
+  ],
+  "engines": {
+    "node": ">=16"
+  },
+  "scripts": {
+    "build": "make build",
+    "build-module": "make build-module",
+    "unit-tests": "make unit-tests",
+    "lint": "make lint",
+    "publish-npm": "make publish",
+    "test": "make unit-tests",
+    "clean": "make clean"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/flaviostutz/appconfiger.git"
+  },
+  "author": "flaviostutz",
+  "license": "MIT",
+  "bugs": {
+    "url": "https://github.com/flaviostutz/appconfiger/issues"
+  },
+  "homepage": "https://github.com/flaviostutz/appconfiger#readme",
+  "devDependencies": {
+    "@shopify/eslint-plugin": "^42.0.1",
+    "@stutzlab/eslint-config": "^0.0.5",
+    "@types/diff": "^5.0.2",
+    "@types/jest": "^29.1.2",
+    "@types/js-yaml": "^4.0.5",
+    "@types/node": "^18.11.0",
+    "@types/yargs": "^17.0.13",
+    "@typescript-eslint/eslint-plugin": "^5.40.0",
+    "@typescript-eslint/parser": "^5.40.0",
+    "esbuild": "^0.15.11",
+    "esbuild-jest": "^0.5.0",
+    "eslint": "^8.25.0",
+    "eslint-config-prettier": "^8.5.0",
+    "jest": "^29.2.0",
+    "prettier": "2.7.1",
+    "typescript": "^4.8.4"
+  },
+  "dependencies": {
+  },
+  "publishConfig": {
+    "access": "public",
+    "registry": "https://registry.npmjs.org"
+  }
+}

@@ -1,0 +1,13 @@
+{
+    "folders": [
+      {
+        "path": "../core"
+      },
+      {
+        "path": "../middy"
+      },
+      {
+        "path": "../examples/random-generator-lambda"
+      }
+    ]
+  }

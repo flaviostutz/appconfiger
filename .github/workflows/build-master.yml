@@ -1,0 +1,19 @@
+name: build-master
+
+on:
+  push:
+    branches: ['main']
+
+jobs:
+  build:
+    name: Build affected from master
+    uses: flaviostutz/gh-makefile/.github/workflows/make-ci.yml@main
+    with:
+      working-directory: ./
+      tooling: node
+      tooling-version: 16
+      tooling-cache: yarn
+      target-build: true
+      target-lint: true
+      target-unit-tests: true
+      target-get-environment-url: false
