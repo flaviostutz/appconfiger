@@ -47,7 +47,7 @@ const asession = await appconfiger({
   applicationId: "tifgo2h",
   configurationProfileId: "dy2ta4b",
   environmentId: "olevrb8",
-  ttl: 300,
+  cacheTTL: 300,
 });
 
 function sumNumbers(value1: number, value2 number): number {

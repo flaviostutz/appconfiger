@@ -1,0 +1,13 @@
+{
+  "private": true,
+  "name": "idempotender",
+  "workspaces": [
+    "core",
+    "middy",
+    "examples/random-generator-lambda"
+  ],
+  "packageManager": "yarn@3.2.4",
+  "devDependencies": {
+    "nx": "15.0.13"
+  }
+}

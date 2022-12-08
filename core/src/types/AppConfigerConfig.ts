@@ -1,14 +1,27 @@
-import { DynamoDBClient } from '@aws-sdk/client-dynamodb';
-
 /**
  * AppConfiger configurations
  */
 export type AppConfigerConfig = {
 
   /**
-   * DynamoDB table name used for storing Executions
-   * Defaults to 'IdempotencyExecutions'
+   * Application Identifier of AppConfig. Required
    */
-  dynamoDBTableName?: string;
+   applicationId: string;
+
+  /**
+   * Configuration Profile Identifier of AppConfig. Required
+   */
+   configurationProfileId: string;
+
+  /**
+   * Environment Identifier of AppConfig. Required
+   */
+   environmentId: string;
+
+   /**
+    * Time in seconds to keep polling for configuration updates
+    * Defaults to 300 seconds
+    */
+   pollingInterval?: number;
 
 };
