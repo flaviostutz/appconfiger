@@ -41,13 +41,13 @@ function sumNumbers(value1: number, value2 number): number {
 - Create function
 
 ```js
-import appconfiger from '@appconfiger/core';
+import { startAppConfiger } from '@appconfiger/core';
 
-const asession = await appconfiger({
+const asession = await startAppConfiger({
   applicationId: "tifgo2h",
   configurationProfileId: "dy2ta4b",
   environmentId: "olevrb8",
-  cacheTTL: 300,
+  pollingInterval: 300,
 });
 
 function sumNumbers(value1: number, value2 number): number {
@@ -76,13 +76,11 @@ function sumNumbers(value1: number, value2 number): number {
 
     - EnvironmentId as in AWS AppConfig. Required
 
-  - **ttl**
+  - **pollingInterval**
 
-    - Time in seconds in which a fetched configuration will remain cached
+    - Time in seconds for polling for new configuration updates
 
-    - After timeout, a background operation will poll for a newer configuration
-
-    - While the configuration is being polled a staled cache version of the configuration will be used
+    - In the meanwhile a cached version of the configuration is returned
 
     - Defaults to 300
 
@@ -102,9 +100,10 @@ function sumNumbers(value1: number, value2 number): number {
 
 - **contents()**
 
-  - Returns the raw configuration profile contents.
-  
-  - In case configurationProfileId is of type Feature Flag, it will return all feature flags along with all its attributes.
-  
-  - If its FreeForm, the raw contents will be returned (maybe a JSON, yml or plain text).
+  - Returns the raw configuration profile contents with attribute _contentType_ and _configuration_.
 
+    - If _contentType_ is "application/json", _configuration_ attribute is automatically parsed to a javascript object
+
+  - In case configurationProfileId is of type Feature Flag, it will return all feature flags along with all its attributes.
+
+  - If its FreeForm, the raw contents will be returned (maybe a JSON object, yml or plain text).

@@ -4,21 +4,22 @@ import {
   GetLatestConfigurationResponse,
 } from '@aws-sdk/client-appconfigdata';
 
-import { core } from './core';
-import { AppConfiger } from './types/AppConfiger';
 import { Contents } from './types/Contents';
+import { Tracker } from './types/Tracker';
 
-const startTracker = async (initialToken: string): AppConfiger => {
+const startTracker = async (initialToken: string): Promise<Tracker> => {
   const acClient = new AppConfigDataClient({});
+  let active = true;
+  let timeoutHandler: NodeJS.Timeout;
 
-  const contents:Contents = {
+  const contents: Contents = {
     contentType: '',
     configuration: null,
   };
 
   let nextToken = initialToken;
 
-  const pollConfiguration = async ():Promise<void> => {
+  const pollConfiguration = async (): Promise<void> => {
     const latestConfigCmd = new GetLatestConfigurationCommand({
       ConfigurationToken: nextToken,
     });
@@ -36,34 +37,37 @@ const startTracker = async (initialToken: string): AppConfiger => {
     // eslint-disable-next-line require-atomic-updates
     nextToken = latestConfigResp.NextPollConfigurationToken;
 
+    // 'Configuration' will only be non null if it was updated since last
+    // time this session fetched it
     if (latestConfigResp.Configuration) {
       contents.configuration = decodeConfiguration(latestConfigResp);
       contents.contentType = latestConfigResp.ContentType;
     }
 
-    setTimeout(() => pollConfiguration, latestConfigResp.NextPollIntervalInSeconds * 1000);
+    // schedule next polling
+    if (active) {
+      timeoutHandler = setTimeout(() => {
+        // eslint-disable-next-line no-void
+        void pollConfiguration();
+      }, latestConfigResp.NextPollIntervalInSeconds * 1000);
+    }
   };
 
   // start polling
   await pollConfiguration();
 
   return {
-    contents: ():any => {
-      // FIXME
-      return null;
+    contents: (): Contents => {
+      return contents;
     },
-    featureFlagEnabled: (name: string): boolean => {
-      // FIXME
-      return false;
-    },
-    featureFlag: (name: string): any => {
-      // FIXME
-      return {};
+    stop: (): void => {
+      clearTimeout(timeoutHandler);
+      active = false;
     },
   };
 };
 
-const decodeConfiguration = (configurationResponse:GetLatestConfigurationResponse):any => {
+const decodeConfiguration = (configurationResponse: GetLatestConfigurationResponse): any => {
   const contentType = configurationResponse.ContentType;
   if (!contentType) {
     return configurationResponse.Configuration;
@@ -74,14 +78,11 @@ const decodeConfiguration = (configurationResponse:GetLatestConfigurationRespons
     return JSON.parse(str);
   }
 
-  if (contentType.includes('yml') ||
-      contentType.includes('yaml') ||
-      contentType === 'text/plain') {
-    const str = new TextDecoder().decode(configurationResponse.Configuration);
-    return str;
+  if (contentType.includes('yml') || contentType.includes('yaml') || contentType === 'text/plain') {
+    return new TextDecoder().decode(configurationResponse.Configuration);
   }
 
   return configurationResponse.Configuration;
 };
 
-export { core };
+export { startTracker };

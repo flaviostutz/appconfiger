@@ -30,6 +30,7 @@
   },
   "homepage": "https://github.com/flaviostutz/appconfiger#readme",
   "devDependencies": {
+    "@aws-sdk/client-appconfigdata": "^3.226.0",
     "@shopify/eslint-plugin": "^42.0.1",
     "@stutzlab/eslint-config": "^0.0.5",
     "@types/aws-lambda": "^8.10.108",
@@ -38,6 +39,7 @@
     "@types/node": "^18.11.0",
     "@typescript-eslint/eslint-plugin": "^5.40.0",
     "@typescript-eslint/parser": "^5.40.0",
+    "aws-sdk-client-mock": "^2.0.1",
     "esbuild": "^0.15.11",
     "esbuild-jest": "^0.5.0",
     "eslint": "^8.25.0",

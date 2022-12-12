@@ -6,22 +6,21 @@ export type AppConfigerConfig = {
   /**
    * Application Identifier of AppConfig. Required
    */
-   applicationId: string;
+  applicationId: string;
 
   /**
    * Configuration Profile Identifier of AppConfig. Required
    */
-   configurationProfileId: string;
+  configurationProfileId: string;
 
   /**
    * Environment Identifier of AppConfig. Required
    */
-   environmentId: string;
+  environmentId: string;
 
-   /**
-    * Time in seconds to keep polling for configuration updates
-    * Defaults to 300 seconds
-    */
-   pollingInterval?: number;
-
+  /**
+   * Time in seconds between polls for configuration updates
+   * Defaults to 300 seconds
+   */
+  pollingInterval?: number;
 };

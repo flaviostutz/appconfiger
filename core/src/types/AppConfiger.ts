@@ -1,3 +1,4 @@
+import { Contents } from './Contents';
 
 export interface AppConfiger {
 
@@ -7,7 +8,7 @@ export interface AppConfiger {
    * configuration parameter 'ttl'.
    * While the newer parameters are fetched, this data might be stale.
    */
-  contents(): any;
+  contents(): Contents;
 
   /**
    * Returns true if feature flag is enabled in AppConfig
@@ -25,4 +26,9 @@ export interface AppConfiger {
    * @param name Feature flag name
    */
   featureFlag(name: string): any;
+
+  /**
+   * Stop polling configuration
+   */
+  stop(): void;
 }

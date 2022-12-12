@@ -3,7 +3,7 @@
   "version": "0.0.1",
   "description": "Javascript library for accessing AWS AppConfig configuration and feature flags",
   "main": "dist/index.js",
-  "types": "dist/core/src/index.d.ts",
+  "types": "dist/index.d.ts",
   "files": [
     "dist/index.js"
   ],

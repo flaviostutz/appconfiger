@@ -1,24 +1,34 @@
 /* eslint-disable no-undefined */
-import appconfigerCore from '@appconfiger/core';
+import { startAppConfiger } from '@appconfiger/core';
 import middy from '@middy/core';
-import { APIGatewayProxyEvent, APIGatewayProxyResult } from 'aws-lambda';
 
+import { AppConfigerMiddleware } from './types/AppConfigerMiddleware';
 import { AppConfigerMiddyConfig } from './types/AppConfigerMiddyConfig';
 
-const middleware = (
+const middleware = async (
   config: AppConfigerMiddyConfig,
-): middy.MiddlewareObj<APIGatewayProxyEvent, APIGatewayProxyResult> => {
-  if (!config.keyMapper && !config.keyJmespath?.trim()) {
+): Promise<AppConfigerMiddleware> => {
+  if (!config.featureFlag && !config.featureFlag?.trim()) {
     throw new Error(
-      "Config: Either 'keyJmespath' or a custom 'keyMapper' function is required in configuration object",
+      "Config: 'featureFlag' is required in configuration object to indicate which feature flag controls if this function is enabled or not",
     );
   }
-  const idemCore = appconfigerCore(config);
+  const asession = await startAppConfiger(config);
 
-  const before: middy.MiddlewareFn = async (request): Promise<any> => {
-    // get execution
-    const execution = await idemCore.getExecution(key);
+  const before: middy.MiddlewareFn = async (): Promise<any> => {
+    if (!asession.featureFlagEnabled(config.featureFlag)) {
+      throw new Error(`Function disabled (${config.featureFlag})`);
+    }
     return Promise.resolve(undefined);
+  };
+
+  const stop = ():void => {
+    asession.stop();
+  };
+
+  return {
+    before,
+    stop,
   };
 };
 

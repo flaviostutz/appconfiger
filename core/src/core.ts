@@ -1,19 +1,18 @@
 import {
   AppConfigDataClient,
-  GetLatestConfigurationCommand,
-  GetLatestConfigurationResponse,
   StartConfigurationSessionCommand,
-  StartConfigurationSessionResponse,
 } from '@aws-sdk/client-appconfigdata';
 
+import { startTracker } from './tracker';
 import { AppConfigerConfig } from './types/AppConfigerConfig';
 import { AppConfiger } from './types/AppConfiger';
+import { Contents } from './types/Contents';
 
 const defaultConfig: AppConfigerConfig = {
   applicationId: '',
   configurationProfileId: '',
   environmentId: '',
-  cacheTTL: 300,
+  pollingInterval: 300,
 };
 
 /**
@@ -22,7 +21,7 @@ const defaultConfig: AppConfigerConfig = {
  * execution output for your specific case
  * @param config Configuration parameters
  */
-const core = async (config: AppConfigerConfig): Promise<AppConfiger> => {
+const startCore = async (config: AppConfigerConfig): Promise<AppConfiger> => {
   if (!config.applicationId) {
     throw new Error('"applicationId" is required in configuration');
   }
@@ -35,8 +34,8 @@ const core = async (config: AppConfigerConfig): Promise<AppConfiger> => {
 
   const config1 = { ...defaultConfig, ...config };
 
-  if (!config1.cacheTTL) {
-    throw new Error('"cacheTTL" is required in configuration');
+  if (!config1.pollingInterval) {
+    throw new Error('"pollingInterval" is required in configuration');
   }
 
   const acClient = new AppConfigDataClient({});
@@ -44,25 +43,38 @@ const core = async (config: AppConfigerConfig): Promise<AppConfiger> => {
     ApplicationIdentifier: config1.applicationId,
     ConfigurationProfileIdentifier: config1.configurationProfileId,
     EnvironmentIdentifier: config1.environmentId,
-    RequiredMinimumPollIntervalInSeconds: config.cacheTTL,
+    RequiredMinimumPollIntervalInSeconds: config.pollingInterval,
   });
   const startSessionResp = await acClient.send(startSessionCmd);
-  startSessionResp.InitialConfigurationToken;
+  if (!startSessionResp.InitialConfigurationToken) {
+    throw new Error('"InitialConfigurationToken" must be defined after session is created');
+  }
+
+  // start background polling
+  const tracker = await startTracker(startSessionResp.InitialConfigurationToken);
 
   return {
-    contents: ():any => {
-      // FIXME
-      return null;
-    },
-    featureFlagEnabled: (name: string): boolean => {
-      // FIXME
-      return false;
+    contents: (): Contents => {
+      return tracker.contents();
     },
     featureFlag: (name: string): any => {
-      // FIXME
-      return {};
+      const contents = tracker.contents();
+      if (contents.contentType === 'application/json') {
+        return contents.configuration[name];
+      }
+      throw new Error(`Usupported content type for feature flag checks: ${contents.contentType}`);
+    },
+    featureFlagEnabled: (name: string): boolean => {
+      const contents = tracker.contents();
+      if (contents.contentType === 'application/json') {
+        return contents.configuration[name]?.enabled;
+      }
+      throw new Error(`Usupported content type for feature flag checks: ${contents.contentType}`);
+    },
+    stop: (): void => {
+      tracker.stop();
     },
   };
 };
 
-export { core };
+export { startCore };

@@ -7,59 +7,147 @@ import {
   StartConfigurationSessionResponse,
 } from '@aws-sdk/client-appconfigdata';
 
-import { core } from './core';
+import { sleep } from './utils';
+import { startCore } from './core';
 
 const testConfig = {
   applicationId: 'aaaaa',
   configurationProfileId: 'bbbbb',
   environmentId: 'ccccc',
-  cacheTTL: 300,
+  pollingInterval: 1000,
 };
-
-// configure AppConfig SDK mocks
-const acMock = mockClient(AppConfigDataClient);
-const resp1:StartConfigurationSessionResponse = {
-  InitialConfigurationToken: 'token123',
-};
-acMock.on(StartConfigurationSessionCommand).resolves(resp1);
 
 const mockAppConfigContents = {
-  featFlag1: {
-    enabled: true,
-  },
-  featFlag2: {
-    enabled: true,
-    customParameter1: 'value1',
-    customParameter2: 'value2',
-  },
-  featFlag3: {
-    enabled: false,
+  contentType: 'application/json',
+  configuration: {
+    featFlag1: {
+      enabled: true,
+    },
+    featFlag2: {
+      enabled: true,
+      customParameter1: 'value1',
+      customParameter2: 'value2',
+    },
+    featFlag3: {
+      enabled: false,
+    },
   },
 };
-const resp2:GetLatestConfigurationResponse = {
+const resp1: StartConfigurationSessionResponse = {
+  InitialConfigurationToken: 'token123',
+};
+const resp2: GetLatestConfigurationResponse = {
   NextPollConfigurationToken: 'token456',
-  NextPollIntervalInSeconds: 2,
+  NextPollIntervalInSeconds: 1,
   ContentType: 'application/json',
-  Configuration: new TextEncoder().encode(JSON.stringify(mockAppConfigContents)),
+  Configuration: new TextEncoder().encode(JSON.stringify(mockAppConfigContents.configuration)),
 };
-acMock.on(GetLatestConfigurationCommand).resolves(resp2);
-
 
 describe('when instantiating core(config)', () => {
+  let acMock = mockClient(AppConfigDataClient);
+  beforeEach(() => {
+    // configure AppConfig SDK mocks
+    acMock = mockClient(AppConfigDataClient);
+    acMock.on(StartConfigurationSessionCommand).resolves(resp1);
+    acMock.on(GetLatestConfigurationCommand).resolves(resp2);
+  });
 
   it('should fetch initial conf on creation', async () => {
     expect(acMock.calls().length).toBe(0);
-    const asession = await core(testConfig);
+    const asession = await startCore(testConfig);
     expect(acMock.calls().length).toBe(2);
-    expect(asession.contents()).toBe(mockAppConfigContents);
+    expect(asession.contents()).toStrictEqual(mockAppConfigContents);
     asession.contents();
     asession.contents();
     expect(acMock.calls().length).toBe(2);
+    asession.stop();
+  });
+
+  it('should re-fetch config after polling time', async () => {
+    const asession = await startCore(testConfig);
+    expect(asession.contents()).toStrictEqual(mockAppConfigContents);
+    expect(acMock.calls().length).toBe(2);
+    await sleep(1100);
+    expect(acMock.calls().length).toBe(3);
+    expect(asession.contents()).toStrictEqual(mockAppConfigContents);
+    expect(acMock.calls().length).toBe(3);
+    asession.stop();
+  });
+
+  it('use previous config when poll doest return updated config', async () => {
+    const asession = await startCore(testConfig);
+    expect(asession.contents()).toStrictEqual(mockAppConfigContents);
+
+    // next poll won't return configuration
+    const resp2a: GetLatestConfigurationResponse = {
+      NextPollConfigurationToken: 'token789',
+      NextPollIntervalInSeconds: 1,
+      ContentType: 'application/json',
+    };
+    acMock.on(GetLatestConfigurationCommand).resolves(resp2a);
+    expect(asession.contents()).toStrictEqual(mockAppConfigContents);
+
+    await sleep(1100);
+    expect(acMock.calls().length).toBe(3);
+    expect(asession.contents()).toStrictEqual(mockAppConfigContents);
+    asession.stop();
+  });
+
+  it('update config when poll returns new contents', async () => {
+    const asession = await startCore(testConfig);
+    expect(asession.contents()).toStrictEqual(mockAppConfigContents);
+
+    // next poll will change configuration
+    const conf2a = { featFlag1: { enabled: false } };
+    const resp2a: GetLatestConfigurationResponse = {
+      NextPollConfigurationToken: 'token789',
+      NextPollIntervalInSeconds: 1,
+      ContentType: 'application/json',
+      Configuration: new TextEncoder().encode(JSON.stringify(conf2a)),
+    };
+    acMock.on(GetLatestConfigurationCommand).resolves(resp2a);
+    expect(asession.contents()).toStrictEqual(mockAppConfigContents);
+
+    await sleep(1100);
+    expect(acMock.calls().length).toBe(3);
+    expect(asession.contents().configuration).toStrictEqual(conf2a);
+    asession.stop();
+  });
+
+  it('check if feature flag is enabled', async () => {
+    const asession = await startCore(testConfig);
+    expect(asession.featureFlagEnabled('featFlag1')).toBeTruthy();
+    expect(asession.featureFlagEnabled('anythingFlag')).toBeFalsy();
+    expect(asession.featureFlagEnabled('featFlag3')).toBeFalsy();
+    asession.stop();
+  });
+
+  it('get feature flag contents successfully', async () => {
+    const asession = await startCore(testConfig);
+    expect(asession.featureFlag('featFlag1')).toStrictEqual(
+      mockAppConfigContents.configuration.featFlag1,
+    );
+    expect(asession.featureFlag('anythingFlag')).toBeUndefined();
+    asession.stop();
+  });
+
+  it('config with text contents should work', async () => {
+    const resp2a: GetLatestConfigurationResponse = {
+      NextPollConfigurationToken: 'token789',
+      NextPollIntervalInSeconds: 1,
+      ContentType: 'text/plain',
+      Configuration: new TextEncoder().encode('my custom config here'),
+    };
+    acMock.on(GetLatestConfigurationCommand).resolves(resp2a);
+
+    const asession = await startCore(testConfig);
+    expect(asession.contents().configuration).toBe('my custom config here');
+    asession.stop();
   });
 
   it('should throw exception for missing parameters', async () => {
     await expect(async () => {
-      await core({
+      await startCore({
         applicationId: 'aaaaa',
         configurationProfileId: 'bbbb',
         environmentId: '',
@@ -67,7 +155,7 @@ describe('when instantiating core(config)', () => {
     }).rejects.toThrow();
 
     await expect(async () => {
-      await core({
+      await startCore({
         applicationId: '',
         configurationProfileId: 'bbbb',
         environmentId: 'ccc',
@@ -75,12 +163,11 @@ describe('when instantiating core(config)', () => {
     }).rejects.toThrow();
 
     await expect(async () => {
-      await core({
+      await startCore({
         applicationId: 'aaaaa',
         configurationProfileId: '',
         environmentId: 'ccc',
       });
     }).rejects.toThrow();
   });
-
 });

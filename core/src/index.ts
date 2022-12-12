@@ -1,5 +1,7 @@
-import { core } from './core';
+import { startCore } from './core';
 
 export { AppConfigerConfig } from './types/AppConfigerConfig';
 
-export default core;
+const startAppConfiger = startCore;
+
+export { startAppConfiger };
