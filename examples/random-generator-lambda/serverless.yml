@@ -14,21 +14,6 @@ provider:
   environment:
     STAGE: ${sls:stage}
 
-resources:
-  Resources:
-    IdempotencyExecutions:
-      Type: AWS::DynamoDB::Table
-      Properties:
-        AttributeDefinitions:
-          - AttributeName: Id
-            AttributeType: S
-        KeySchema:
-          - AttributeName: Id
-            KeyType: HASH
-        TimeToLiveSpecification:
-          AttributeName: executionTTL
-          Enabled: true
-
 package:
   individually: true
 
@@ -43,7 +28,6 @@ functions:
 plugins:
   - serverless-esbuild
   - serverless-prune-plugin # for removing old lambda versions
-  - '@nearst/serverless-dynalite' # run local dynamodb in offline mode
   - serverless-offline
 
 custom:

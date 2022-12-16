@@ -3,16 +3,7 @@ import middy from '@middy/core';
 import cors from '@middy/http-cors';
 import jsonBodyParser from '@middy/http-json-body-parser';
 import httpHeaderNormalizer from '@middy/http-header-normalizer';
-import idempotenderMiddy from '@idempotender/middy';
-import { DynamoDBClient } from '@aws-sdk/client-dynamodb';
-
-let dynamoDBClient = new DynamoDBClient({});
-if (process.env.STAGE === 'local') {
-  dynamoDBClient = new DynamoDBClient({
-    endpoint: 'http://localhost:8000',
-    region: 'local',
-  });
-}
+import appConfigerMiddy from '@appconfiger/middy';
 
 async function lambdaHandler(event: APIGatewayProxyEvent): Promise<APIGatewayProxyResult> {
   console.log(event.body);
@@ -27,12 +18,11 @@ async function lambdaHandler(event: APIGatewayProxyEvent): Promise<APIGatewayPro
 }
 
 export const handler = middy(lambdaHandler)
-  .use(idempotenderMiddy({
-    keyJmespath: '[method,path]',
-    dynamoDBClient,
-    executionTTL: 5,
-    lockTTL: 2,
-    lockAcquireTimeout: 1,
+  .use(appConfigerMiddy({
+    applicationId: '123',
+    configurationProfileId: 'abc',
+    environmentId: 'xyz',
+    featureFlag: '',
   }))
   .use(jsonBodyParser())
   .use(httpHeaderNormalizer())

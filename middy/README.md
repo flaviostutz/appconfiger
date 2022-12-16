@@ -1,87 +1,95 @@
 # idempotender
 
-Middy middleware for making AWS Lambda Functions imdepotent.
+Middy middleware for configuring AWS Lambda Functions using AWS AppConfig.
 
-The overall steps that this middlware performs are:
-
-- At the beginning of the function execution, it will extract a key from the input and look for that "execution" in DynamoDB
-- In general, if the key exists in a DynamoDB table, it means this execution was already done, so the middleware get the previous output and return it to the Lambda function caller. The caller won't know it wasn't really executed, and will receive the same response as the first client, which is expected.
-- If the key doesn't exist, then actual function handler will be run and at the end the middleware will save the output to DynamoDB table before returning it to the caller
-- Imdepondenter will control a lock between two parallel requests so only one request will be processed at a time for a specific key and the second one will receive the same contents of the first request, but the actual handler logic will run only once
+You can automatically enable/disable a function based on a certain feature flag, or in more complex scenarios you can get the full configuration from `request.context.appconfiger` for more advanced tweaks in your function.
 
 ## Usage
 
-- `npm install --save @idempotender/middy`
+- `npm install --save @appconfiger/middy`
 
+### Example: Enable/disable a Lambda function based on feature flag state
 
-### Example: Simple Lambda
-
-- In this example, we will use attribute 'param1' from event as the key of idempotency while hashing and using lock to avoid concurrency
+- In this example the function will automatically refuse all requests if the feature flag 'myFunctionFlag' is disabled or inexistent in AppConfig.
 
 - Create Lambda function
 
 ```js
-import idempotenderMiddy from '@idempotender/middy';
+import appConfigerMiddy from '@appconfiger/middy';
 
 const handler = middy((event, context) => {
-  console.log(`Running for '${event.param1}' on ${new Date()}`);
-  return { message: `This was run for '${event.param1}' on ${new Date()}` };
+  console.log(`Running function on ${new Date()}`);
+  return { message: `This function was run on ${new Date()}` };
 });
 
 handler.use(
-  idempotenderMiddy({
-    keyJmespath: 'param1',
+  appConfigerMiddy({
+    applicationId: 'aaaaa', //from AppConfig
+    configurationProfileId: 'bbbbb', //from AppConfig
+    environmentId: 'ccccc', //from AppConfig
+    featureFlag: 'myFunctionFlag',
   }),
 );
 ```
 
-### Example: Lambda called via REST API
-
-- In this example, the Lambda is invoked through AWS API Gateway, so we select attributes 'method', 'path' and request 'body' from event as the key of idempotency.
-
-- The extracted key will then be hashed before being stored in database, so data is not exposed, but you have a very very tiny change of collision (we use hash-256).
-
-- Create AWS Lambda function exposed through AWS API Gateway
-
-```js
-import idempotenderMiddy from '@idempotender/middy';
-
-const handler = middy((event, context) => {
-  console.log('Will only execute this once for the same URL method + path + body contents');
-  return { message: `This was run for '${event.param1}' on ${new Date()}` };
-});
-
-handler.use(
-  idempotender({
-    keyJmespath: '[method, path, body]',
-  }),
-);
-```
 
 ## Reference
 
-- These are the default values of the configuration
+### Configuration
 
 ```js
-const idem = idempotenderMiddy({
-  lockEnable: true,
+const idem = appConfigerMiddy({
+  applicationId: '[APP ID IN APPCONFIG]',
+  configurationProfileId: '[CONFIG PROFILE ID IN APPCONFIG]',
+  environmentId: '[ENV ID IN APPCONFIG]',
+  featureFlag: '[FLAG NAME IN APP CONFIG]',
+  pollingInterval: 300,
 }
 ```
 
-- You must use idempotender middleware as the first middleware in the chain so that it can store the response after all other middlewares are executed and be the first to return when a idempotent call is detected
+- Config attributes
+
+  - **applicationId**
+
+    - Application name as defined in AppConfig. Required.
+
+  - **configurationProfileId**
+
+    - Configuration Profile Id as defined in AppConfig. Required.
+
+  - **environmentId**
+
+    - Environment Id as defined in AppConfig. Required.
+
+  - **featureFlag**
+
+    - Feature flag name. Required.
+    - This Lambda function will be enabled only if there is a enabled feature flag with this same name in AppConfig
+    - If you use an empty string as the name, this function will be always enabled and you can get AppConfig configurations from `context.appconfiger` for more complex checks.
+
+  - **pollingInterval**
+
+    - Interval in seconds for checking if there is a newer configuration in AppConfig
+    - During this period the latest version of the configuration will be available
+    - The polling is performed in background, so your function won't wait for the polling to finish before being run
+    - Defaults to 300 (5 minutes)
+
+### Handler context
+
+When your function is called, you can access the attribute `appconfiger` in the context of the handler for accessing the complete configuration object.
+
+- If the configuration in AppConfig is of type 'application/json', which is the most common situation, you will have a parsed object in the context.
+
+- When using the 'feature flag' type of configuration in AppConfig, implicitly you are using 'application/json' and in this attribute you will have access to the complete list of feature flags and its inner attributes (as you configured in AppConfig). For example:
 
 ```js
-// example
-handler = middy(lambdaHandler)
-  .use(idempotenderMiddy(config))
-  .use(httpErrorHandler())
-  .use(cors());
+  context.appconfiger >>> {
+    featureFlag1: {
+      enabled: true,
+      customData1: 123
+    },
+    featureFlag2: {
+      enabled: false
+    }
+  }
 ```
-
-- Config attributes:
-
-  - **dynamoDBTableName**
-
-    - DynamoDB table to use for controlling idempotency
-
-    - Defaults to 'IdempotencyExecutions'

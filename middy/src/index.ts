@@ -1,24 +1,36 @@
 /* eslint-disable no-undefined */
-import { startAppConfiger } from '@appconfiger/core';
+import { startAppConfiger, AppConfiger } from '@appconfiger/core';
 import middy from '@middy/core';
 
 import { AppConfigerMiddleware } from './types/AppConfigerMiddleware';
 import { AppConfigerMiddyConfig } from './types/AppConfigerMiddyConfig';
 
-const middleware = async (
+const middleware = (
   config: AppConfigerMiddyConfig,
-): Promise<AppConfigerMiddleware> => {
-  if (!config.featureFlag && !config.featureFlag?.trim()) {
+): AppConfigerMiddleware => {
+  // eslint-disable-next-line @typescript-eslint/no-unnecessary-condition
+  if (config.featureFlag === undefined) {
     throw new Error(
       "Config: 'featureFlag' is required in configuration object to indicate which feature flag controls if this function is enabled or not",
     );
   }
-  const asession = await startAppConfiger(config);
 
-  const before: middy.MiddlewareFn = async (): Promise<any> => {
-    if (!asession.featureFlagEnabled(config.featureFlag)) {
+  let asession:AppConfiger;
+
+  const before: middy.MiddlewareFn = async (request:any): Promise<any> => {
+    if (!asession) {
+      try {
+        // eslint-disable-next-line require-atomic-updates
+        asession = await startAppConfiger(config);
+      } catch (err) {
+        throw new Error(`Error initializing AppConfiger. err=${err}`);
+      }
+    }
+    if (config.featureFlag.trim() !== '' && !asession.featureFlagEnabled(config.featureFlag)) {
       throw new Error(`Function disabled (${config.featureFlag})`);
     }
+
+    request.context.appconfiger = asession.contents().configuration;
     return Promise.resolve(undefined);
   };
 
