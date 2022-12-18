@@ -10,7 +10,7 @@ This lib uses AWS SDK and adds the following capabilities on top of it:
 - Fetches new configuration in background from time to time (polling period)
   - When you request the configuration it will return immediatelly the cached response, even if stale, while it fetches the newer configuration in background to avoid adding latency to your main process
 
-- Middy middleware that will add the attribute `appconfiger` to the Lambda context with the AppConfig configuration contents, or can disable the Lambda function if a certain feature flag is not activated.
+- Middy middleware will add the attribute `appconfiger` to the Lambda context with the AppConfig configuration contents, or can disable the Lambda function entirely if a certain feature flag is not activated.
 
 <img width="800" src="./diagram.png">
 

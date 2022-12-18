@@ -52,7 +52,7 @@ export const handler = middy(lambdaHandler)
       configurationProfileId: `${process.env.APPCONFIG_CONFIGURATION_PROFILE_ID}`,
       environmentId: `${process.env.APPCONFIG_ENVIRONMENT_ID}`,
       pollingInterval: 15,
-      featureFlag: '',
+      featureFlag: 'enableLambda',
     }),
   )
   .use(jsonBodyParser())

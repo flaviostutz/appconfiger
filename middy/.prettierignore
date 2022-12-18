@@ -2,5 +2,3 @@ build
 coverage
 dist
 node_modules
-rules.md
-test-cases
