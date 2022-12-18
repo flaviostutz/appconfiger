@@ -731,7 +731,7 @@
   resolved "https://registry.yarnpkg.com/@babel/compat-data/-/compat-data-7.20.5.tgz#86f172690b093373a933223b4745deeb6049e733"
   integrity sha512-KZXo2t10+/jxmkhNXc7pZTqRvSOIvVv/+lJwHS+B2rErwOyjuVRh60yVpb7liQ1U5t7lLJ1bz+t8tSypUZdm0g==
 
-"@babel/core@^7.1.0", "@babel/core@^7.11.6", "@babel/core@^7.12.17", "@babel/core@^7.12.3", "@babel/core@^7.20.2":
+"@babel/core@^7.1.0", "@babel/core@^7.11.6", "@babel/core@^7.12.17", "@babel/core@^7.12.3":
   version "7.20.5"
   resolved "https://registry.yarnpkg.com/@babel/core/-/core-7.20.5.tgz#45e2114dc6cd4ab167f81daf7820e8fa1250d113"
   integrity sha512-UdOWmk4pNWTm/4DlPUl/Pt4Gz4rcEMb7CY0Y3eJl5Yz1vI8ZJGmHWaVE55LoxRjdpx0z259GE9U5STA9atUinQ==
@@ -2208,18 +2208,10 @@
   resolved "https://registry.yarnpkg.com/@sinonjs/text-encoding/-/text-encoding-0.7.2.tgz#5981a8db18b56ba38ef0efb7d995b12aa7b51918"
   integrity sha512-sXXKG+uL9IrKqViTtao2Ws6dy0znu9sOaP1di/jKGW1M6VssO8vlpXCQcpZ+jisQ1tTFAC5Jo/EOzFbggBagFQ==
 
-"@stutzlab/eslint-config@^0.0.5":
-  version "0.0.5"
-  resolved "https://registry.yarnpkg.com/@stutzlab/eslint-config/-/eslint-config-0.0.5.tgz#086231b2d0394cb0d6eb03873db484e137b70c46"
-  integrity sha512-tvHJNUhRcsVkX4vIY8jgJevHBVT97UWsMZoLb/T2lhLqGpuDgfzUbKhacAGDEgedmo1u2Vg6t1ALpj1yu5rT/A==
-  dependencies:
-    "@babel/core" "^7.20.2"
-    "@typescript-eslint/parser" "^5.40.0"
-
-"@stutzlab/eslint-config@^0.0.6":
-  version "0.0.6"
-  resolved "https://registry.yarnpkg.com/@stutzlab/eslint-config/-/eslint-config-0.0.6.tgz#5d29d068b61280e9d349ea62d5b9bf4a1d5b6cd9"
-  integrity sha512-QHppOYESZonvyiYprsT/mVdcLRXmGnzz3KLrlY8/rt2R21sGDUZz6iX0uLb2Yip7ra3m8dPvdlcx7fvaIJd1zQ==
+"@stutzlab/eslint-config@^0.0.7":
+  version "0.0.7"
+  resolved "https://registry.yarnpkg.com/@stutzlab/eslint-config/-/eslint-config-0.0.7.tgz#9aad4d17463c01ce4a16b56fdc1951af9956a065"
+  integrity sha512-uArFsrILANPtTFtYtS1DcxCDeV0H+PZn1+eDtgfPqWNyAAFub+oPepQQMcJIsc9na4fb4ijCA4HslERhOmJP6Q==
   dependencies:
     "@typescript-eslint/parser" "^5.40.0"
 

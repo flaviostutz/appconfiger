@@ -26,7 +26,7 @@ Resources:
     Properties:
       ApplicationId: !Ref AppConfigApplication
       ConfigurationProfileId: !Ref AppConfigConfigurationProfile
-      Description: "Feature flags for random number"
+      Description: 'Feature flags for random number'
       # You can retrieve the configuration from an existing feature flag you created manually by running
       # aws appconfig get-hosted-configuration-version --application-id upp1jmh --configuration-profile-id 9rlgfs6 --version-number 3 test.json
       # cat test.json
@@ -65,7 +65,7 @@ Resources:
           },
           "version": "1"
         }
-      ContentType: "application/json"
+      ContentType: 'application/json'
 
   AppConfigDeploymentStrategyAllAtOnce:
     Type: AWS::AppConfig::DeploymentStrategy

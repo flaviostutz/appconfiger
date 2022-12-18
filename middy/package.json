@@ -33,7 +33,7 @@
   "devDependencies": {
     "@aws-sdk/client-appconfigdata": "^3.226.0",
     "@shopify/eslint-plugin": "^42.0.1",
-    "@stutzlab/eslint-config": "^0.0.5",
+    "@stutzlab/eslint-config": "^0.0.7",
     "@types/aws-lambda": "^8.10.108",
     "@types/diff": "^5.0.2",
     "@types/jest": "^29.1.2",

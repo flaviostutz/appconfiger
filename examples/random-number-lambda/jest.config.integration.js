@@ -1,7 +1,7 @@
 // eslint-disable-next-line import/no-commonjs
 module.exports = {
-  testMatch: ["**/?(*.)+(int).+(ts|tsx|js)"],
+  testMatch: ['**/?(*.)+(int).+(ts|tsx|js)'],
   transform: {
-    "^.+\\.tsx?$": ["esbuild-jest"],
+    '^.+\\.tsx?$': ['esbuild-jest'],
   },
 };

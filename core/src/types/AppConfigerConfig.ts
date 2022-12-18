@@ -2,7 +2,6 @@
  * AppConfiger configurations
  */
 export type AppConfigerConfig = {
-
   /**
    * Application Identifier of AppConfig. Required
    */

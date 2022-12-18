@@ -1,5 +1,5 @@
 service: random-number
-frameworkVersion: "3"
+frameworkVersion: '3'
 
 provider:
   name: aws
@@ -37,12 +37,12 @@ provider:
           Action:
             - appconfig:GetLatestConfiguration
             - appconfig:StartConfigurationSession
-          Resource: "*"
+          Resource: '*'
         - Effect: Allow
           Action:
             - codedeploy:*
           Resource:
-            - "*"
+            - '*'
 
 package:
   individually: true

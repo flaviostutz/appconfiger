@@ -1,7 +1,6 @@
 import { Contents } from './Contents';
 
 export interface AppConfiger {
-
   /**
    * Returns the latest configuration available
    * The contents will be polled automatically according to

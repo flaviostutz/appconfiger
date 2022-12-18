@@ -22,7 +22,7 @@
   },
   "devDependencies": {
     "@shopify/eslint-plugin": "^42.0.1",
-    "@stutzlab/eslint-config": "^0.0.6",
+    "@stutzlab/eslint-config": "^0.0.7",
     "@types/aws-lambda": "^8.10.102",
     "@types/jest": "28.1.7",
     "@types/node": "16.11.49",
