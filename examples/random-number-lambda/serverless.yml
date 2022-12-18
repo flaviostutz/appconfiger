@@ -8,6 +8,14 @@ provider:
   timeout: 10
   memorySize: 128
   logRetentionInDays: 7
+  logs:
+    restApi:
+      accessLogging: true
+      executionLogging: true
+      fullExecutionData: true
+      level: INFO
+  apiGateway:
+    metrics: true
   tracing:
     lambda: true
     apiGateway: true

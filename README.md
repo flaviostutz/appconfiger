@@ -12,6 +12,8 @@ This lib uses AWS SDK and adds the following capabilities on top of it:
 
 - Middy middleware that will add the attribute `appconfiger` to the Lambda context with the AppConfig configuration contents, or can disable the Lambda function if a certain feature flag is not activated.
 
+<img width="800" src="./diagram.png">
+
 You can use it as:
 
 - [Middy Middleware for AWS Lambda functions](middy/README.md)

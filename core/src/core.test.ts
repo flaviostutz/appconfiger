@@ -68,13 +68,18 @@ describe('when instantiating core(config)', () => {
     await asession.contents();
     expect(acMock.calls().length).toBe(2);
     await asession.contents();
+    await sleep(100); // give room for scheduled background poll to take place
+    await asession.contents();
+    await sleep(100); // give room for scheduled background poll to take place
+    await asession.contents();
     await sleep(1500);
     await asession.contents();
-    await asession.contents();
+    await sleep(100); // give room for scheduled background poll to take place
     expect(acMock.calls().length).toBe(3);
     await asession.contents();
     await sleep(1500);
     await asession.contents();
+    await sleep(100); // give room for scheduled background poll to take place
     await asession.contents();
     expect(acMock.calls().length).toBe(4);
     expect(await asession.contents()).toStrictEqual(mockAppConfigContents);
@@ -97,6 +102,7 @@ describe('when instantiating core(config)', () => {
 
     await sleep(1100);
     await asession.contents();
+    await sleep(100); // give room for scheduled background poll to take place
     expect(acMock.calls().length).toBe(3);
     expect(await asession.contents()).toStrictEqual(mockAppConfigContents);
   });
@@ -118,6 +124,7 @@ describe('when instantiating core(config)', () => {
 
     await sleep(1100);
     await asession.contents();
+    await sleep(100); // give room for scheduled background poll to take place
     expect(acMock.calls().length).toBe(3);
     expect((await asession.contents()).configuration).toStrictEqual(conf2a);
   });
