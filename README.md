@@ -12,7 +12,7 @@ This lib uses AWS SDK and adds the following capabilities on top of it:
 
 - Middy middleware will add the attribute `appconfiger` to the Lambda context with the AppConfig configuration contents, or can disable the Lambda function entirely if a certain feature flag is not activated.
 
-<img width="800" src="./diagram.png">
+[<img width="800" src="./diagram.png">](https://youtu.be/MaHVFInXiLM)
 
 You can use it as:
 
@@ -20,6 +20,8 @@ You can use it as:
 - [Core library for anything else](core/README.md)
 - [Check a working example here](examples/random-number-lambda/README.md)
   - Serverless Framework, Middy and Cloudformation definitions for AppConfig, unit tests with mocked AppConfig etc
+
+[Watch a video demo here](https://youtu.be/MaHVFInXiLM)
 
 We are Typescript friendly :)
 
