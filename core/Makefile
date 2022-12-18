@@ -9,10 +9,14 @@ build-module: install
 	npx tsc --emitDeclarationOnly --outDir dist
 
 lint:
-	npx prettier --loglevel warn --write .
-	npx eslint . --ext .ts --fix
+	npx prettier --loglevel warn --check .
+	npx eslint . --ext .ts
 	npx tsc -noEmit --skipLibCheck
 	yarn audit; [[ $? -ge 8 ]] && exit 1 || exit 0
+
+lint-fix:
+	npx prettier --loglevel warn --write .
+	npx eslint . --ext .ts --fix
 
 test: unit-tests
 
@@ -32,6 +36,6 @@ clean:
 	rm -rf node_modules
 	rm -rf dist
 
-install: node_modules
-	yarn install --frozen-lockfile
+install:
+	yarn install --frozen-lockfile --ignore-optional
 

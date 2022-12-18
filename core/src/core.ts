@@ -54,25 +54,22 @@ const startCore = async (config: AppConfigerConfig): Promise<AppConfiger> => {
   const tracker = await startTracker(startSessionResp.InitialConfigurationToken);
 
   return {
-    contents: (): Contents => {
+    contents: async (): Promise<Contents> => {
       return tracker.contents();
     },
-    featureFlag: (name: string): any => {
-      const contents = tracker.contents();
+    featureFlag: async (name: string): Promise<any> => {
+      const contents = await tracker.contents();
       if (contents.contentType === 'application/json') {
         return contents.configuration[name];
       }
       throw new Error(`Usupported content type for feature flag checks: ${contents.contentType}`);
     },
-    featureFlagEnabled: (name: string): boolean => {
-      const contents = tracker.contents();
+    featureFlagEnabled: async (name: string): Promise<boolean> => {
+      const contents = await tracker.contents();
       if (contents.contentType === 'application/json') {
         return contents.configuration[name]?.enabled;
       }
       throw new Error(`Usupported content type for feature flag checks: ${contents.contentType}`);
-    },
-    stop: (): void => {
-      tracker.stop();
     },
   };
 };

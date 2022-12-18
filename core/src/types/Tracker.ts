@@ -5,10 +5,5 @@ export interface Tracker {
   /**
    * Returns the latest value of configuration contents
    */
-  contents(): Contents;
-
-  /**
-   * Stop polling configuration
-   */
-  stop(): void;
+  contents(): Promise<Contents>;
 }

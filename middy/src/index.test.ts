@@ -4,7 +4,7 @@ import { awsContext } from './__mock__/awsContext';
 
 import appConfigerMiddy from './index';
 
-let mockConfiguration:any = null;
+let mockConfiguration: any = null;
 
 const testConfig = {
   applicationId: 'aaaaa',
@@ -15,7 +15,6 @@ const testConfig = {
 };
 
 describe('When using middy middleware', () => {
-
   it('Should run function when feature flag is enabled', async () => {
     mockConfiguration = {
       flag1: {
@@ -23,7 +22,7 @@ describe('When using middy middleware', () => {
       },
     };
 
-    const appConfigMiddleware = await appConfigerMiddy(testConfig);
+    const appConfigMiddleware = appConfigerMiddy(testConfig);
 
     // eslint-disable-next-line @typescript-eslint/no-empty-function
     const handler = middy(() => {});
@@ -39,7 +38,7 @@ describe('When using middy middleware', () => {
       },
     };
 
-    const appConfigMiddleware = await appConfigerMiddy(testConfig);
+    const appConfigMiddleware = appConfigerMiddy(testConfig);
 
     // eslint-disable-next-line @typescript-eslint/no-empty-function
     const handler = middy(() => {});
@@ -51,14 +50,12 @@ describe('When using middy middleware', () => {
     };
 
     await expect(invokeHandler).rejects.toThrowError();
-    appConfigMiddleware.stop();
   });
 
   it('Should enable function if empty feature flag name', async () => {
-    mockConfiguration = {
-    };
+    mockConfiguration = {};
 
-    const appConfigMiddleware = await appConfigerMiddy({
+    const appConfigMiddleware = appConfigerMiddy({
       ...testConfig,
       featureFlag: '',
     });
@@ -80,9 +77,9 @@ describe('When using middy middleware', () => {
       },
     };
 
-    const appConfigMiddleware = await appConfigerMiddy(testConfig);
+    const appConfigMiddleware = appConfigerMiddy(testConfig);
 
-    let runContext:any = null;
+    let runContext: any = null;
     const handler = middy(async (request: any, context: any) => {
       runContext = context;
       return {};
@@ -96,17 +93,15 @@ describe('When using middy middleware', () => {
     expect(runContext.appconfiger.flag1).toBeDefined();
     expect(runContext.appconfiger.flag1.enabled).toBeTruthy();
   });
-
 });
-
 
 jest.mock('@appconfiger/core', () => {
   return {
     startAppConfiger: jest.fn().mockImplementation(() => {
       return {
         // eslint-disable-next-line @typescript-eslint/no-empty-function
-        stop: ():void => {},
-        contents: ():any => {
+        stop: (): void => {},
+        contents: (): any => {
           return {
             contentType: 'application/json',
             configuration: mockConfiguration,

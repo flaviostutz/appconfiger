@@ -2,6 +2,7 @@
 
 This is the javascript library for fetching configurations from AWS AppConfig.
 
+TODO: add timeout waiting for fetch app config
 ## Usage
 
 - `npm install --save @appconfiger/core`

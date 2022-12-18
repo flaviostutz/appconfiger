@@ -8,13 +8,13 @@ export interface AppConfiger {
    * configuration parameter 'ttl'.
    * While the newer parameters are fetched, this data might be stale.
    */
-  contents(): Contents;
+  contents(): Promise<Contents>;
 
   /**
    * Returns true if feature flag is enabled in AppConfig
    * @param name Name of the feature flag in AppConfig
    */
-  featureFlagEnabled(name: string): boolean;
+  featureFlagEnabled(name: string): Promise<boolean>;
 
   /**
    * Returns the feature flag contents, including custom attribute if exists
@@ -25,10 +25,5 @@ export interface AppConfiger {
    * }
    * @param name Feature flag name
    */
-  featureFlag(name: string): any;
-
-  /**
-   * Stop polling configuration
-   */
-  stop(): void;
+  featureFlag(name: string): Promise<any>;
 }

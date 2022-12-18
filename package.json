@@ -4,7 +4,7 @@
   "workspaces": [
     "core",
     "middy",
-    "examples/random-generator-lambda"
+    "examples/random-number-lambda"
   ],
   "packageManager": "yarn@3.2.4",
   "devDependencies": {

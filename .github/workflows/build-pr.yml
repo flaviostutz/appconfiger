@@ -16,4 +16,5 @@ jobs:
       target-build: true
       target-lint: true
       target-unit-tests: true
+      target-deploy: false
       target-get-environment-url: false

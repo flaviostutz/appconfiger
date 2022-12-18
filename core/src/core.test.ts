@@ -56,27 +56,35 @@ describe('when instantiating core(config)', () => {
     expect(acMock.calls().length).toBe(0);
     const asession = await startCore(testConfig);
     expect(acMock.calls().length).toBe(2);
-    expect(asession.contents()).toStrictEqual(mockAppConfigContents);
-    asession.contents();
-    asession.contents();
+    expect(await asession.contents()).toStrictEqual(mockAppConfigContents);
+    await asession.contents();
+    await asession.contents();
     expect(acMock.calls().length).toBe(2);
-    asession.stop();
   });
 
   it('should re-fetch config after polling time', async () => {
     const asession = await startCore(testConfig);
-    expect(asession.contents()).toStrictEqual(mockAppConfigContents);
+    expect(await asession.contents()).toStrictEqual(mockAppConfigContents);
+    await asession.contents();
     expect(acMock.calls().length).toBe(2);
-    await sleep(1100);
+    await asession.contents();
+    await sleep(1500);
+    await asession.contents();
+    await asession.contents();
     expect(acMock.calls().length).toBe(3);
-    expect(asession.contents()).toStrictEqual(mockAppConfigContents);
-    expect(acMock.calls().length).toBe(3);
-    asession.stop();
+    await asession.contents();
+    await sleep(1500);
+    await asession.contents();
+    await asession.contents();
+    expect(acMock.calls().length).toBe(4);
+    expect(await asession.contents()).toStrictEqual(mockAppConfigContents);
+    await asession.contents();
+    expect(acMock.calls().length).toBe(4);
   });
 
   it('use previous config when poll doest return updated config', async () => {
     const asession = await startCore(testConfig);
-    expect(asession.contents()).toStrictEqual(mockAppConfigContents);
+    expect(await asession.contents()).toStrictEqual(mockAppConfigContents);
 
     // next poll won't return configuration
     const resp2a: GetLatestConfigurationResponse = {
@@ -85,17 +93,17 @@ describe('when instantiating core(config)', () => {
       ContentType: 'application/json',
     };
     acMock.on(GetLatestConfigurationCommand).resolves(resp2a);
-    expect(asession.contents()).toStrictEqual(mockAppConfigContents);
+    expect(await asession.contents()).toStrictEqual(mockAppConfigContents);
 
     await sleep(1100);
+    await asession.contents();
     expect(acMock.calls().length).toBe(3);
-    expect(asession.contents()).toStrictEqual(mockAppConfigContents);
-    asession.stop();
+    expect(await asession.contents()).toStrictEqual(mockAppConfigContents);
   });
 
   it('update config when poll returns new contents', async () => {
     const asession = await startCore(testConfig);
-    expect(asession.contents()).toStrictEqual(mockAppConfigContents);
+    expect(await asession.contents()).toStrictEqual(mockAppConfigContents);
 
     // next poll will change configuration
     const conf2a = { featFlag1: { enabled: false } };
@@ -106,29 +114,27 @@ describe('when instantiating core(config)', () => {
       Configuration: new TextEncoder().encode(JSON.stringify(conf2a)),
     };
     acMock.on(GetLatestConfigurationCommand).resolves(resp2a);
-    expect(asession.contents()).toStrictEqual(mockAppConfigContents);
+    expect(await asession.contents()).toStrictEqual(mockAppConfigContents);
 
     await sleep(1100);
+    await asession.contents();
     expect(acMock.calls().length).toBe(3);
-    expect(asession.contents().configuration).toStrictEqual(conf2a);
-    asession.stop();
+    expect((await asession.contents()).configuration).toStrictEqual(conf2a);
   });
 
   it('check if feature flag is enabled', async () => {
     const asession = await startCore(testConfig);
-    expect(asession.featureFlagEnabled('featFlag1')).toBeTruthy();
-    expect(asession.featureFlagEnabled('anythingFlag')).toBeFalsy();
-    expect(asession.featureFlagEnabled('featFlag3')).toBeFalsy();
-    asession.stop();
+    expect(await asession.featureFlagEnabled('featFlag1')).toBeTruthy();
+    expect(await asession.featureFlagEnabled('anythingFlag')).toBeFalsy();
+    expect(await asession.featureFlagEnabled('featFlag3')).toBeFalsy();
   });
 
   it('get feature flag contents successfully', async () => {
     const asession = await startCore(testConfig);
-    expect(asession.featureFlag('featFlag1')).toStrictEqual(
+    expect(await asession.featureFlag('featFlag1')).toStrictEqual(
       mockAppConfigContents.configuration.featFlag1,
     );
-    expect(asession.featureFlag('anythingFlag')).toBeUndefined();
-    asession.stop();
+    expect(await asession.featureFlag('anythingFlag')).toBeUndefined();
   });
 
   it('config with text contents should work', async () => {
@@ -141,8 +147,7 @@ describe('when instantiating core(config)', () => {
     acMock.on(GetLatestConfigurationCommand).resolves(resp2a);
 
     const asession = await startCore(testConfig);
-    expect(asession.contents().configuration).toBe('my custom config here');
-    asession.stop();
+    expect((await asession.contents()).configuration).toBe('my custom config here');
   });
 
   it('should throw exception for missing parameters', async () => {

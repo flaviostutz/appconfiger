@@ -32,7 +32,6 @@ handler.use(
 );
 ```
 
-
 ## Reference
 
 ### Configuration
@@ -83,13 +82,14 @@ When your function is called, you can access the attribute `appconfiger` in the 
 - When using the 'feature flag' type of configuration in AppConfig, implicitly you are using 'application/json' and in this attribute you will have access to the complete list of feature flags and its inner attributes (as you configured in AppConfig). For example:
 
 ```js
-  context.appconfiger >>> {
+context.appconfiger >>>
+  {
     featureFlag1: {
       enabled: true,
-      customData1: 123
+      customData1: 123,
     },
     featureFlag2: {
-      enabled: false
-    }
-  }
+      enabled: false,
+    },
+  };
 ```

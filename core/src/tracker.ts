@@ -9,8 +9,6 @@ import { Tracker } from './types/Tracker';
 
 const startTracker = async (initialToken: string): Promise<Tracker> => {
   const acClient = new AppConfigDataClient({});
-  let active = true;
-  let timeoutHandler: NodeJS.Timeout;
 
   const contents: Contents = {
     contentType: '',
@@ -18,8 +16,10 @@ const startTracker = async (initialToken: string): Promise<Tracker> => {
   };
 
   let nextToken = initialToken;
+  let nextPollTime = 0;
 
   const pollConfiguration = async (): Promise<void> => {
+    console.log('>>>> POLLINGGG!');
     const latestConfigCmd = new GetLatestConfigurationCommand({
       ConfigurationToken: nextToken,
     });
@@ -34,35 +34,40 @@ const startTracker = async (initialToken: string): Promise<Tracker> => {
       throw new Error('NextPollConfigurationToken could not be read. Stopping polling');
     }
 
+    // prettier-ignore
+    nextPollTime = new Date().getTime() + (latestConfigResp.NextPollIntervalInSeconds * 1000);
+
     // eslint-disable-next-line require-atomic-updates
     nextToken = latestConfigResp.NextPollConfigurationToken;
 
     // 'Configuration' will only be non null if it was updated since last
     // time this session fetched it
-    if (latestConfigResp.Configuration) {
+    if (latestConfigResp.Configuration && `${latestConfigResp.Configuration}` !== '') {
       contents.configuration = decodeConfiguration(latestConfigResp);
       contents.contentType = latestConfigResp.ContentType;
     }
-
-    // schedule next polling
-    if (active) {
-      timeoutHandler = setTimeout(() => {
-        // eslint-disable-next-line no-void
-        void pollConfiguration();
-      }, latestConfigResp.NextPollIntervalInSeconds * 1000);
-    }
   };
 
-  // start polling
+  const step = async (): Promise<Contents> => {
+    // verify if we should trigger a polling in background
+    // it won't wait for AppConfig update for the current request, but will
+    // make the updated configuration value available for next requests
+    // console.log(`>>> ${pollingMutex} ${new Date().getTime()} ${nextPollTime}`);
+    if (new Date().getTime() >= nextPollTime) {
+      console.log('>>>> WILL POLL');
+      // mutex is used so that only one request can schedule a polling, even if
+      // it's taking longer than the Lambda event request itself
+      await pollConfiguration();
+    }
+    return contents;
+  };
+
+  // perform first polling
   await pollConfiguration();
 
   return {
-    contents: (): Contents => {
-      return contents;
-    },
-    stop: (): void => {
-      clearTimeout(timeoutHandler);
-      active = false;
+    contents: async (): Promise<Contents> => {
+      return step();
     },
   };
 };

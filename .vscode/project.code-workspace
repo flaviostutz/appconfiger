@@ -7,7 +7,7 @@
         "path": "../middy"
       },
       {
-        "path": "../examples/random-generator-lambda"
+        "path": "../examples/random-number-lambda"
       }
     ]
   }

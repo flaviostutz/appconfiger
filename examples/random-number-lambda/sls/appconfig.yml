@@ -1,0 +1,88 @@
+Resources:
+  AppConfigApplication:
+    Type: AWS::AppConfig::Application
+    Properties:
+      Name: ${self:service}
+      Description: Random Number generator
+
+  AppConfigEnvironment:
+    Type: AWS::AppConfig::Environment
+    Properties:
+      Name: dev
+      Description: Dev environment for Random Number
+      ApplicationId: !Ref AppConfigApplication
+
+  AppConfigConfigurationProfile:
+    Type: AWS::AppConfig::ConfigurationProfile
+    Properties:
+      ApplicationId: !Ref AppConfigApplication
+      Name: ${self:service}
+      Description: Configuration profile for random number
+      LocationUri: hosted
+      Type: AWS.AppConfig.FeatureFlags
+
+  AppConfigHostedConfigurationVersion:
+    Type: AWS::AppConfig::HostedConfigurationVersion
+    Properties:
+      ApplicationId: !Ref AppConfigApplication
+      ConfigurationProfileId: !Ref AppConfigConfigurationProfile
+      Description: "Feature flags for random number"
+      # You can retrieve the configuration from an existing feature flag you created manually by running
+      # aws appconfig get-hosted-configuration-version --application-id upp1jmh --configuration-profile-id 9rlgfs6 --version-number 3 test.json
+      # cat test.json
+      Content: !Sub |
+        {
+          "flags": {
+            "enableLambda": {
+              "attributes": {
+                "maxValue": {
+                  "constraints": {
+                    "maximum": 999999,
+                    "minimum": 10,
+                    "required": true,
+                    "type": "number"
+                  }
+                },
+                "minValue": {
+                  "constraints": {
+                    "maximum": 999999,
+                    "minimum": 0,
+                    "required": true,
+                    "type": "number"
+                  }
+                }
+              },
+              "description": "Enable Lambda for number generation along with min and max value for tweaking random number generation",
+              "name": "Enable Lambda for number generation"
+            }
+          },
+          "values": {
+            "enableLambda": {
+              "enabled": true,
+              "maxValue": 400000,
+              "minValue": 300000
+            }
+          },
+          "version": "1"
+        }
+      ContentType: "application/json"
+
+  AppConfigDeploymentStrategyAllAtOnce:
+    Type: AWS::AppConfig::DeploymentStrategy
+    Properties:
+      Name: AllAtOnce
+      Description: Deployment strategy used for immediate swapping of configuration
+      DeploymentDurationInMinutes: 0
+      FinalBakeTimeInMinutes: 0
+      GrowthFactor: 100
+      GrowthType: LINEAR
+      ReplicateTo: NONE
+
+  AppConfigDeployment:
+    Type: AWS::AppConfig::Deployment
+    Properties:
+      ApplicationId: !Ref AppConfigApplication
+      ConfigurationProfileId: !Ref AppConfigConfigurationProfile
+      ConfigurationVersion: !Ref AppConfigHostedConfigurationVersion
+      DeploymentStrategyId: !Ref AppConfigDeploymentStrategyAllAtOnce
+      EnvironmentId: !Ref AppConfigEnvironment

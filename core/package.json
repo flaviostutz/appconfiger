@@ -15,6 +15,7 @@
     "build-module": "make build-module",
     "unit-tests": "make unit-tests",
     "lint": "make lint",
+    "lint-fix": "make lint-fix",
     "publish-npm": "make publish",
     "test": "make unit-tests",
     "clean": "make clean"
@@ -41,7 +42,7 @@
     "@typescript-eslint/eslint-plugin": "^5.40.0",
     "@typescript-eslint/parser": "^5.40.0",
     "aws-sdk-client-mock": "^2.0.1",
-    "esbuild": "^0.15.11",
+    "esbuild": "^0.16.8",
     "esbuild-jest": "^0.5.0",
     "eslint": "^8.25.0",
     "eslint-config-prettier": "^8.5.0",
