@@ -2,13 +2,13 @@ Resources:
   AppConfigApplication:
     Type: AWS::AppConfig::Application
     Properties:
-      Name: ${self:service}
+      Name: ${self:service}-${sls:stage}
       Description: Random Number generator
 
   AppConfigEnvironment:
     Type: AWS::AppConfig::Environment
     Properties:
-      Name: dev
+      Name: ${sls:stage}
       Description: Dev environment for Random Number
       ApplicationId: !Ref AppConfigApplication
 
@@ -16,7 +16,7 @@ Resources:
     Type: AWS::AppConfig::ConfigurationProfile
     Properties:
       ApplicationId: !Ref AppConfigApplication
-      Name: ${self:service}
+      Name: ${self:service}-${sls:stage}
       Description: Configuration profile for random number
       LocationUri: hosted
       Type: AWS.AppConfig.FeatureFlags
@@ -30,41 +30,7 @@ Resources:
       # You can retrieve the configuration from an existing feature flag you created manually by running
       # aws appconfig get-hosted-configuration-version --application-id upp1jmh --configuration-profile-id 9rlgfs6 --version-number 3 test.json
       # cat test.json
-      Content: !Sub |
-        {
-          "flags": {
-            "enableLambda": {
-              "attributes": {
-                "maxValue": {
-                  "constraints": {
-                    "maximum": 999999,
-                    "minimum": 10,
-                    "required": true,
-                    "type": "number"
-                  }
-                },
-                "minValue": {
-                  "constraints": {
-                    "maximum": 999999,
-                    "minimum": 0,
-                    "required": true,
-                    "type": "number"
-                  }
-                }
-              },
-              "description": "Enable Lambda for number generation along with min and max value for tweaking random number generation",
-              "name": "Enable Lambda for number generation"
-            }
-          },
-          "values": {
-            "enableLambda": {
-              "enabled": true,
-              "maxValue": 400000,
-              "minValue": 300000
-            }
-          },
-          "version": "1"
-        }
+      Content: !Sub ${file(sls/enableLambda.js):generate}
       ContentType: 'application/json'
 
   AppConfigDeploymentStrategyAllAtOnce:
