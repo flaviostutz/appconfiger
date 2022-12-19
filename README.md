@@ -27,7 +27,7 @@ We are Typescript friendly :)
 
 ## Sample usage for AWS Lambda
 
-- In this example, we will disable the Lambda function if the feature flag "random-number-enable" is disabled or doesn't exist in AWS AppConfig. It will check if the feature flag was changed every 5 minutes.
+- In this example, we will disable the Lambda function if the feature flag "myFunctionFlag" is disabled or doesn't exist in AWS AppConfig. It will check if the feature flag was changed every 5 minutes.
 
 - `npm install --save @appconfiger/middy`
 
