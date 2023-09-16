@@ -1,8 +1,6 @@
-# idempotender core
+# appconfiger core
 
 This is the javascript library for fetching configurations from AWS AppConfig.
-
-TODO: add timeout waiting for fetch app config
 
 ## Usage
 
